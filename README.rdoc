@@ -112,8 +112,8 @@ and then
 
 == CHANGE LOG:
 
-0.0.1  - created 
-0.0.2  - add inheritance, and mother methods [unique,sequence_number]
+* 0.0.1  - created 
+* 0.0.2  - add inheritance, and mother methods [unique,sequence_number]
 
 == TODO 
 
