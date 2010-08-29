@@ -1,0 +1,6 @@
+adapter: postgresql
+host: localhost
+database: famili
+username: postgres
+password: postgres
+encoding: utf8
