@@ -1,12 +1,43 @@
 == Famili
 
-Yet More ObjectMother pattern implementation for rails testing
+Yet Another ObjectMother pattern implementation for rails testing
 
-Diff from factory-girl & machinist:
-  each factory hash their own class 
-  That allows inheritance, 
-  lazy loading by rails dependency manager (we need it cose we gonna use factories in front end tests)
-  So Factory/Mother is just custom lib class.
+== Why
+  
+We meet some problems with factory-girl:
+
+* We require quite complex logic for creation of test models
+* We require use factories with running rails application for integration tests 
+* So why don't make factory just another class in rails lib ?
+
+== Example  
+
+To define factory/mother for model User just create class in your lib directory:
+
+ `lib/famili/user.rb`
+
+ module Famili
+    class User < Mother
+      fist_name { 'nicola' }
+      last_name { 'nicola' }
+      email     { "#{last_name}@mail.lv" } 
+
+      def before_save(user)
+          #...
+      end
+
+      def after_create(user)
+          #...
+      end
+    end
+  end
+
+
+And u can use it anywhere in tests or controllers:
+  
+ Famili::User.create(:fist_name=>'Override') # create model
+ Famili::User.build(:fist_name=>'Override')  # build model not saving
+ Famili::User.hash(:fist_name=>'Override')   #get attributes hash 
 
 == Install
 
