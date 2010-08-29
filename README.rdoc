@@ -8,7 +8,8 @@ We meet some problems with factory-girl:
 
 * We require quite complex logic for creation of test models
 * We require use factories with running rails application for integration tests 
-* So why don't make factory just another class in rails lib ?
+* So why don't make factory just another class in rails lib, and get extensibility of factories/mothers 
+and rails lazy loading and dependency management?
 
 == Example  
 
