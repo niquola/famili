@@ -14,7 +14,7 @@ We meet some problems with factory-girl:
 
 To define factory/mother for model User just create class in your lib directory:
 
- `lib/famili/user.rb`
+ #lib/famili/user.rb`
 
  module Famili
     class User < Mother
@@ -31,6 +31,16 @@ To define factory/mother for model User just create class in your lib directory:
       end
     end
   end
+ 
+  #lib/famili/article
+
+  module Famili
+    class Article < Mother
+      #creating association
+      user  { Famili::User.create }
+      title { "article by #{user.last_name}" }
+    end
+  end
 
 
 And u can use it anywhere in tests or controllers:
@@ -38,6 +48,54 @@ And u can use it anywhere in tests or controllers:
  Famili::User.create(:fist_name=>'Override') # create model
  Famili::User.build(:fist_name=>'Override')  # build model not saving
  Famili::User.hash(:fist_name=>'Override')   #get attributes hash 
+
+ Famili::Article.create #create article with user
+
+== Inheritance 
+
+U can inherite mothers just like plain ruby classes,
+Just think each declaration field_name {...} as method definition
+
+   module Famili
+     class User < Mother
+       name { "nicola" }
+     end
+
+     class Person < User 
+       email { "#{name}@emial.com" }
+     end
+   end
+
+== Mother methods
+
+Mother have some usable methods, which can be used
+
+  module Famili
+    class User < Mother
+      last_name { 'nicola' }
+      login { "#{last_name}_#{unique}" } 
+      number { sequence_number }
+    end 
+  end
+
+* sequence_number - incremented with each instance
+* unique - just unique string 
+* we a planing add more
+
+==  Nutshell
+
+each declaration 
+ 
+  field_name { block }
+
+just create method
+
+  def field_name
+  end
+
+and register attribuite to copy in model
+
+  field :field_name
 
 == Install
 
@@ -55,6 +113,7 @@ and then
 == CHANGE LOG:
 
 0.0.1  - created 
+0.0.2  - add inheritance, and mother methods [unique,sequence_number]
 
 == TODO 
 

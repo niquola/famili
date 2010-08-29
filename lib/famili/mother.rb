@@ -1,13 +1,29 @@
+require 'date'
 module  Famili
-  def before_save(model)
-  end
-
-  def after_create(model)
-  end
 
   class Mother
+
+    def before_save(model)
+    end
+
+    def after_create(model)
+    end
+
+    def unique
+      "#{Time.now.to_s}__#{rand(100)}"
+    end
+
+    def sequence_number
+      @sequence_number||= self.class.objects_sequence_number
+    end
+
     class << self
       alias :class_name :name
+
+      def objects_sequence_number 
+        @sequence_number ||=0
+        @sequence_number += 1 
+      end
 
       def parent_class=(klass)
         @parent_class = klass
@@ -30,7 +46,7 @@ module  Famili
       end
 
       def attribures
-        @attribures||=parent_class && parent_class.attribures
+        @attribures||=parent_class && parent_class.attribures.clone
         @attribures||=[]
         @attribures.uniq!
         @attribures
