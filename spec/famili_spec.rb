@@ -11,6 +11,7 @@ describe Famili do
 
   class User < ActiveRecord::Base
     has_many :articles
+    validates_presence_of :login
   end
 
   class Article < ActiveRecord::Base
@@ -38,6 +39,10 @@ describe Famili do
     end
   end
 
+  it "should use save! model" do
+    lambda { Famili::User.create(:login=>nil) }.should raise_error
+  end
+
   it "should create model" do
     nicola = Famili::User.create 
     nicola.class.should == User
@@ -46,6 +51,11 @@ describe Famili do
 
     ivan = Famili::User.create(:name=>'ivan')
     ivan.name.should == 'ivan'
+  end
+
+  it "mother should have #hash method returning symbolized hash" do
+    hash = Famili::User.hash 
+    hash.keys.each {|key| key.should be_kind_of(Symbol) }
   end
 
   it "should create model with asscociation" do

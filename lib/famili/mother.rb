@@ -60,7 +60,7 @@ module  Famili
 
       def create(opts={})
         mother,model = _build(opts)
-        model.save
+        model.save!
         mother.after_create(model)
         model
       end
@@ -70,9 +70,9 @@ module  Famili
         model
       end
 
-      def hash
-        mother,model = _build
-        model.attribures
+      def hash(opts={})
+        mother,model = _build(opts)
+        model.attributes.dup.symbolize_keys!
       end
 
 
