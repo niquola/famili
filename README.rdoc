@@ -114,6 +114,7 @@ and then
 
 * 0.0.1  - created 
 * 0.0.2  - add inheritance, and mother methods [unique,sequence_number]
+* 0.0.3  - fix Mother.create call model.save!; Mother.hash return symbolized hash
 
 == TODO 
 
