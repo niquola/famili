@@ -10,7 +10,7 @@ module  Famili
     end
 
     def unique
-      "#{Time.now.to_s}__#{rand(100)}"
+      "#{Time.now.to_s}__#{object_id}"
     end
 
     def sequence_number
