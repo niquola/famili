@@ -58,6 +58,7 @@ describe Famili do
     hash.keys.each {|key| key.should be_kind_of(Symbol) }
   end
 
+
   it "should create model with asscociation" do
     article = Famili::Article.create
     article.user.should_not be_nil
@@ -73,5 +74,13 @@ describe Famili do
     seq_number = Famili::User.new.sequence_number
     next_seq_number = Famili::User.new.sequence_number
     next_seq_number.should == (seq_number + 1)
+  end
+
+  it "mother should generate unique numbers" do
+    logins = []
+    10000.times do 
+      logins << Famili::User.hash[:login]
+    end
+    logins.include?(Famili::User.hash[:login]).should_not be_true
   end
 end
