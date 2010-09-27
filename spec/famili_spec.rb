@@ -83,4 +83,12 @@ describe Famili do
     end
     logins.include?(Famili::User.hash[:login]).should_not be_true
   end
+
+  it "should not add attribuite name" do
+    Famili::User.name
+    Famili::User.attribures.should_not include(:name)
+    lambda {
+      Famili::User.unexisting
+    }.should raise_error(NoMethodError)
+  end
 end

@@ -2,17 +2,27 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
+require 'rubygems'
+require 'spec/rake/spectask'
+
 
 desc 'Default: run unit tests.'
 task :default => :test
 
 desc 'Test the pg_gnostic plugin.'
-Rake::TestTask.new(:test) do |t|
+#Rake::TestTask.new(:test) do |t|
+  #t.libs << 'lib'
+  #t.libs << 'spec'
+  #t.pattern = 'spec/**/*_spec.rb'
+  #t.verbose = true
+#end
+
+Spec::Rake::SpecTask.new(:test) do |t|
   t.libs << 'lib'
-  t.libs << 'spec'
-  t.pattern = 'spec/**/*_spec.rb'
-  t.verbose = true
+  t.warning = true
+  t.rcov = true
 end
+
 
 desc 'Generate documentation for the pg_gnostic plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|

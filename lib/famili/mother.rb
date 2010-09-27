@@ -38,11 +38,13 @@ module  Famili
       end
 
       def name(&block)
+        return class_name unless block_given?
         field(:name,&block)
       end
 
       def method_missing(method,&block)
-        field(method,&block)
+        return field(method,&block) if block_given?
+        super
       end
 
       def attribures
