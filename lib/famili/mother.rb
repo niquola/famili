@@ -80,6 +80,7 @@ module  Famili
       if RUBY_VERSION.sub(/(\d+\.\d+).*/, "$1").to_f < 1.9
         def hash(opts={})
           warn "[DEPRECATION] `hash` is deprecated and not supported for Ruby 1.9. Please use `build_hash` instead."
+          build_hash(opts)
         end
       end
 
