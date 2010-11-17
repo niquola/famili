@@ -115,7 +115,8 @@ and then
 * 0.0.1  - created 
 * 0.0.2  - add inheritance, and mother methods [unique,sequence_number]
 * 0.0.3  - fix Mother.create call model.save!; Mother.hash return symbolized hash
-* 0.0.5  - add raise NoMethodError if property declared without block (becose it is error-prone), fix Famili::Mother.class#name method 
+* 0.0.5  - add raise NoMethodError if property declared without block (becose it is error-prone), fix Famili::Mother.class#name method
+* 0.0.6  - rename Mother#hash to Mother#build_hash (to avoid conflicts with Object#hash in Ruby 1.9). Old name keeped as alias when using with oldest versions of Ruby for backward compatibility.
 
 == TODO 
 

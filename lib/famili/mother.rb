@@ -68,13 +68,19 @@ module  Famili
       end
 
       def build(opts={})
-        mother,model = _build(opts)
+        _,model = _build(opts)
         model
       end
 
-      def hash(opts={})
-        mother,model = _build(opts)
+      def build_hash(opts={})
+        _,model = _build(opts)
         model.attributes.dup.symbolize_keys!
+      end
+
+      if RUBY_VERSION.sub(/(\d+\.\d+).*/, "$1").to_f < 1.9
+        def hash(opts={})
+          warn "[DEPRECATION] `hash` is deprecated and not supported for Ruby 1.9. Please use `build_hash` instead."
+        end
       end
 
 
