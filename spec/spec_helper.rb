@@ -1,7 +1,4 @@
-require 'rubygems'
-gem 'activerecord','=2.3.8'
-require 'active_record'
-
+require "active_record"
 
 def path(path)
   File.join(File.dirname(__FILE__),path)

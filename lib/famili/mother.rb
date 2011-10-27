@@ -1,8 +1,8 @@
 require 'date'
-module  Famili
+require 'famili/father'
 
+module Famili
   class Mother
-
     def before_save(model)
     end
 
@@ -20,9 +20,9 @@ module  Famili
     class << self
       alias :class_name :name
 
-      def objects_sequence_number 
+      def objects_sequence_number
         @sequence_number ||=0
-        @sequence_number += 1 
+        @sequence_number += 1
       end
 
       def parent_class=(klass)
@@ -39,94 +39,67 @@ module  Famili
 
       def name(&block)
         return class_name unless block_given?
-        field(:name,&block)
+        field(:name, &block)
       end
 
-      def method_missing(method,&block)
-        return field(method,&block) if block_given?
+      def method_missing(method, &block)
+        return field(method, &block) if block_given?
         super
       end
 
-      def attribures
-        @attribures||=parent_class && parent_class.attribures.clone
-        @attribures||=[]
-        @attribures.uniq!
-        @attribures
+      def attributes
+        @attributes||=parent_class && parent_class.attributes.clone || {}
+        @attributes
       end
 
-      def field(method,&block)
-        attribures<< method
-        #puts "define_method #{method} #{self}"
-        define_method(method,&block) if block_given?
+      def field(method, &block)
+        attributes[method] = block
       end
 
-      def create(opts={})
-        mother,model = _build(opts)
-        model.save!
-        mother.after_create(model)
-        model
+      def father
+        @father ||= Famili::Father.new(self.new, attributes)
       end
 
-      def build(opts={})
-        _,model = _build(opts)
-        model
+      def create(opts = {})
+        father.create(opts)
       end
 
-      def build_hash(opts={})
-        _,model = _build(opts)
-        model.attributes.dup.symbolize_keys!
+      def build
+        father.build(opts)
       end
 
-      if RUBY_VERSION.sub(/(\d+\.\d+).*/, "\\1").to_f < 1.9
-        def hash(opts={})
-          warn "[DEPRECATION] `hash` is deprecated and not supported for Ruby 1.9. Please use `build_hash` instead."
-          build_hash(opts)
+      def build_hash(opts = {})
+        father.build_hash(opts)
+      end
+
+      def scope(name)
+        saved_attributes = @attributes
+        @attributes = {}
+        yield
+        scopes[name] = @attributes
+        singleton_class.send(:define_method, name) do
+          father.send(name)
         end
+      ensure
+        @attributes = saved_attributes
       end
 
-
-      def _build(opts)
-        mother = new
-        model = model_class.new
-        opts.symbolize_keys!
-        passed_attrs = opts.keys  || []
-
-        mother.instance_eval do
-          singleton = class <<self;self;end;
-          passed_attrs.each do |attr|
-            value = opts[attr]
-            if value.class == Proc
-              singleton.send(:define_method,attr,&value)
-            else
-              singleton.send(:define_method,attr) do
-                opts[attr]
-              end
-            end
-          end
+      def scopes
+        @scopes ||= parent_class && parent_class.scopes.dup || {}
       end
 
-      fields = ( passed_attrs + attribures).uniq
-      fields.each do |attr|
-        attr = attr.to_sym
-        value = opts.key?(attr) ?  opts[attr] : mother.send(attr)
-        model.send(:"#{attr}=",value)
-      end
-      mother.before_save(model)
-      [mother,model]
-    end
+      def model_class(klass=nil)
+        if klass
+          @model_class = klass
+          return
+        end
 
-    private
-
-    def model_class(klass=nil)
-      if klass 
-        @model_class = klass
-        return
-      end
-
-      @model_class||= class_name.to_s.split('::')[1..-1].inject(Object) do |mod,const| 
-        mod.const_get(const)
+        @model_class ||= if class_name =~ /(.*)Famili$/ || class_name =~ /Famili::(.*)/
+                           $1.split('::').inject(Object) do |mod, const|
+                             mod.const_get(const)
+                           end
+                         end
       end
     end
   end
-end
 end
