@@ -51,6 +51,11 @@ describe Famili do
     end
   end
 
+  it "should have access to Kernel functions" do
+    user = UserFamili.create(:last_name => ->{ "smith_#{rand(100)}" })
+    user.last_name.should be_start_with("smith_")
+  end
+
   it "should auto-evaluate model class" do
     Famili::User.send(:model_class).should == User
     UserFamili.send(:model_class).should == User

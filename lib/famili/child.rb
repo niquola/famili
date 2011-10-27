@@ -5,9 +5,9 @@ module Famili
       @attributes = attributes
     end
 
-    def method_missing(name)
+    def method_missing(name, *arguments)
       if @mother.respond_to?(name)
-        @mother.send(name)
+        @mother.send(name, *arguments)
       else
         evaluate_value(name.to_sym)
       end
