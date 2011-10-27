@@ -14,20 +14,23 @@ module Famili
     end
 
     def born
-      @hash = {}
-      @attributes.keys.each { |name| evaluate_value(name) }
-      @mother.class.model_class.new(@hash)
+      @unresolved_keys = @attributes.keys
+      @model = @mother.class.model_class.new
+      evaluate_value(@unresolved_keys.first) until @unresolved_keys.empty?
+      @model
     end
 
     private
 
     def evaluate_value(name)
-      value = @hash[name]
-      if value.nil? && !@hash.key?(name)
+      if @unresolved_keys.include?(name)
+        @unresolved_keys.delete(name)
         attribute_value = @attributes[name]
-        @hash[name] = value = attribute_value.is_a?(::Proc) ? instance_exec(&attribute_value) : attribute_value
+        attribute_value = instance_exec(&attribute_value) if attribute_value.is_a?(::Proc)
+        @model.send("#{name}=", attribute_value)
+      else
+        @model.send(name)
       end
-      value
     end
   end
 end
