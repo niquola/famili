@@ -9,7 +9,7 @@ module Famili
       if @mother.respond_to?(name)
         @mother.send(name, *arguments)
       else
-        evaluate_value(name.to_sym)
+        evaluate_value(name.to_sym, *arguments)
       end
     end
 
@@ -22,14 +22,14 @@ module Famili
 
     private
 
-    def evaluate_value(name)
+    def evaluate_value(name, *arguments)
       if @unresolved_keys.include?(name)
         @unresolved_keys.delete(name)
         attribute_value = @attributes[name]
         attribute_value = instance_exec(&attribute_value) if attribute_value.is_a?(::Proc)
         @model.send("#{name}=", attribute_value)
       else
-        @model.send(name)
+        @model.send(name, *arguments)
       end
     end
   end

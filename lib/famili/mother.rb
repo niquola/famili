@@ -64,7 +64,7 @@ module Famili
         father.create(opts)
       end
 
-      def build
+      def build(opts = {})
         father.build(opts)
       end
 

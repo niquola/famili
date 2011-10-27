@@ -45,15 +45,28 @@ describe Famili do
     last_login_datetime { created_at }
     created_at { Time.now - Random.rand(1000) }
 
+    def mother_random(n)
+      rand(n)
+    end
+
     scope :russian do
       first_name { 'ivan' }
       last_name { 'petrov' }
+    end
+
+    scope :unidentified do
+      last_name { 'unknown' }
     end
   end
 
   it "should have access to Kernel functions" do
     user = UserFamili.create(:last_name => ->{ "smith_#{rand(100)}" })
-    user.last_name.should be_start_with("smith_")
+    user.last_name.should =~ /smith_\d{1,3}/
+  end
+
+  it "should delegate method call to mother" do
+    user = UserFamili.create(:last_name => ->{ "smith_#{mother_random(100)}" })
+    user.last_name.should =~ /smith_\d{1,3}/
   end
 
   it "should auto-evaluate model class" do
@@ -62,11 +75,32 @@ describe Famili do
   end
 
   describe "scopes" do
-    it "should override default values with values from scope" do
-      user = UserFamili.russian.create
+    it "should create from scope" do
+      user = UserFamili.russian.create({})
       user.first_name.should == 'ivan'
       user.last_name.should == 'petrov'
       user.login.should == "petrov_ivan"
+    end
+
+    it "should build from scope" do
+      user = UserFamili.russian.build({})
+      user.first_name.should == 'ivan'
+      user.last_name.should == 'petrov'
+      user.login.should == "petrov_ivan"
+    end
+
+    it "should build_hash from scope" do
+      hash = UserFamili.russian.build_hash
+      hash[:first_name].should == 'ivan'
+      hash[:last_name].should == 'petrov'
+      hash[:login].should == 'petrov_ivan'       
+    end
+
+    it "should chain scopes" do
+      user = UserFamili.russian.unidentified.build
+      user.first_name.should == 'ivan'
+      user.last_name.should == 'unknown'
+      user.login.should == 'unknown_ivan'
     end
   end
 
@@ -87,6 +121,12 @@ describe Famili do
 
     ivan = Famili::User.create(:name=>'ivan')
     ivan.name.should == 'ivan'
+  end
+
+  it "mother should have #build method" do
+    user = UserFamili.build(:last_name => 'stone')
+    user.last_name.should == 'stone'
+    user.first_name.should == 'john'
   end
 
   it "mother should have #build_hash method returning symbolized hash" do
