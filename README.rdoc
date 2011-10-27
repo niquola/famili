@@ -78,6 +78,21 @@ Mother have some usable methods, which can be used
     end 
   end
 
+Mother supports scopes
+
+
+  class UserFamili < Mother
+    last_name { 'nicola' }
+    login { "#{last_name}_#{unique}" }
+    number { sequence_number }
+
+    scope :unidentified do
+      last_name { 'unknown' }
+    end
+  end
+
+  UserFamili.unidentified.create(:first_name => 'john')
+
 * sequence_number - incremented with each instance
 * unique - just unique string 
 * we a planing add more
