@@ -93,7 +93,7 @@ describe Famili do
       hash = UserFamili.russian.build_hash
       hash[:first_name].should == 'ivan'
       hash[:last_name].should == 'petrov'
-      hash[:login].should == 'petrov_ivan'       
+      hash[:login].should == 'petrov_ivan'
     end
 
     it "should chain scopes" do
@@ -101,6 +101,47 @@ describe Famili do
       user.first_name.should == 'ivan'
       user.last_name.should == 'unknown'
       user.login.should == 'unknown_ivan'
+    end
+
+    it "should support anonymous scope" do
+      shared = UserFamili.scoped(:first_name => 'jeffry')
+      shared.create(:last_name => 'stone').login.should == 'stone_jeffry'
+      shared.create(:last_name => 'snow').login.should == 'snow_jeffry'
+      shared.unidentified.create.login.should == 'unknown_jeffry'
+    end
+  end
+
+  describe "brothers" do
+    it "should build brothers" do
+      brothers = UserFamili.build_brothers(2, :login => ->{ "#{last_name}_#{first_name}_#{rand(100)}" })
+      first, second = brothers
+      first.should_not be_persisted
+      second.should_not be_persisted
+      first.first_name.should == second.first_name
+      first.last_name.should == second.last_name
+      first.login.should_not == second.login
+    end
+
+    it "should create brothers" do
+      brothers = UserFamili.create_brothers(2, :login => ->{ "#{last_name}_#{first_name}_#{rand(100)}" })
+      first, second = brothers
+      first.should be_persisted
+      second.should be_persisted
+      first.first_name.should == second.first_name
+      first.last_name.should == second.last_name
+      first.login.should_not == second.login
+    end
+
+    it "should build brothers with init block" do
+      brothers = UserFamili.build_brothers(2) { |brother| brother.login = "#{brother.login}_#{rand(100)}" }
+      first, second = brothers
+      first.should_not be_persisted
+      second.should_not be_persisted
+      first.first_name.should == second.first_name
+      first.last_name.should == second.last_name
+      first.login.should_not == second.login
+      first.login.should =~ /#{first.last_name}_#{first.first_name}_\d{1,3}/
+      second.login.should =~ /#{second.last_name}_#{second.first_name}_\d{1,3}/
     end
   end
 

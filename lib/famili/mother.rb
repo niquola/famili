@@ -72,6 +72,18 @@ module Famili
         father.build_hash(opts)
       end
 
+      def build_brothers(num, opts = {}, &block)
+        father.build_brothers(num, opts, &block)
+      end
+      
+      def create_brothers(num, opts = {}, &block)
+        father.create_brothers(num, opts, &block)
+      end
+
+      def scoped(attributes = {})
+        father.scoped(attributes)
+      end
+
       def scope(name)
         saved_attributes = @attributes
         @attributes = {}
