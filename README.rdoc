@@ -152,6 +152,7 @@ and then
 * 0.1.3  - supported anonym scopes with scoped. Supported collection creation methods: build_brothers, create_brothers. Supported initialization block for build, create, build_brothers, create_brothers.
 * 0.1.4  - famili now creates child in scope of model. So, *self* is a reference to model.
 * 0.1.5  - fix *method_missing* in *define_method*
+* 0.1.6  - support creation of models with properties which have only set accessors
 
 == TODO 
 

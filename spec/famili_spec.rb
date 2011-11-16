@@ -13,6 +13,14 @@ describe Famili do
     has_many :articles
     validates_presence_of :login
 
+    def nickname=(value)
+      @nickname = value
+    end
+
+    def calculate_nickname
+      @nickname || @login
+    end
+
     def method_missing(name, *args)
       if name.to_s == "not_defined_method"
         "#{name} is not defined"
@@ -90,6 +98,11 @@ describe Famili do
   it "should bypass method_missing to model" do
     user = UserFamili.create :login => ->{ not_defined_method }
     user.login.should == "not_defined_method is not defined"
+  end
+
+  it "should create model with only set access propeties" do
+    user = UserFamili.create(:nickname => ->{ "Mr #{login}" })
+    user.calculate_nickname.should == "Mr #{user.login}"
   end
 
   describe "scopes" do

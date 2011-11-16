@@ -40,23 +40,29 @@ module Famili
       @model.send("#{name}=", attribute_value)
     end
 
-    def undefine_method_stub(method_name)
-      munged_name = munge(method_name)
-      @meta_class.send(:alias_method, method_name, munged_name)
-      @meta_class.send(:remove_method, munged_name)
-    end
-
-    alias :undefine_property_stub :undefine_method_stub
-
     def define_property_stub(property_name)
       define_method_stub property_name do
         @__famili_child__.resolve_property(property_name)
       end if @model.respond_to?(property_name)
     end
 
+    def undefine_property_stub(property_name)
+      undefine_method_stub(property_name) if @meta_class.send(:method_defined?, munge(property_name))
+    end
+
     def define_method_stub(method_name, &block)
       @meta_class.send(:alias_method, munge(method_name), method_name)
       @meta_class.send(:define_method, method_name, &block)
+    end
+
+    def undefine_method_stub(method_name)
+      munged_name = munge(method_name)
+      if @meta_class.send(:method_defined?, munged_name)
+        @meta_class.send(:alias_method, method_name, munged_name)
+        @meta_class.send(:remove_method, munged_name)
+      else
+        @meta_class.send(:remove_method, method_name)
+      end
     end
   end
 end
