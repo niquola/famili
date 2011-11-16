@@ -74,6 +74,11 @@ describe Famili do
     UserFamili.send(:model_class).should == User
   end
 
+  it "should be evaluated in context of model" do
+    user = UserFamili.create :login => ->{ self.to_s }
+    user.login.should == user.to_s
+  end
+
   describe "scopes" do
     it "should create from scope" do
       user = UserFamili.russian.create({})
