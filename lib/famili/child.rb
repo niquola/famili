@@ -17,7 +17,7 @@ module Famili
         if mother.respond_to?(name)
           mother.send(name, *args)
         else
-          super
+          send(@__famili_child__.munge(:method_missing), name, *args)
         end
       end
       @unresolved_property_names.each do |key|
@@ -51,11 +51,11 @@ module Famili
     def define_property_stub(property_name)
       define_method_stub property_name do
         @__famili_child__.resolve_property(property_name)
-      end
+      end if @model.respond_to?(property_name)
     end
 
     def define_method_stub(method_name, &block)
-      @meta_class.send(:alias_method, munge(method_name), method_name) if @model.respond_to?(method_name)
+      @meta_class.send(:alias_method, munge(method_name), method_name)
       @meta_class.send(:define_method, method_name, &block)
     end
   end

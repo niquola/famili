@@ -12,6 +12,14 @@ describe Famili do
   class User < ActiveRecord::Base
     has_many :articles
     validates_presence_of :login
+
+    def method_missing(name, *args)
+      if name.to_s == "not_defined_method"
+        "#{name} is not defined"
+      else
+        super
+      end
+    end
   end
 
   class Article < ActiveRecord::Base
@@ -77,6 +85,11 @@ describe Famili do
   it "should be evaluated in context of model" do
     user = UserFamili.create :login => ->{ self.to_s }
     user.login.should == user.to_s
+  end
+
+  it "should bypass method_missing to model" do
+    user = UserFamili.create :login => ->{ not_defined_method }
+    user.login.should == "not_defined_method is not defined"
   end
 
   describe "scopes" do
