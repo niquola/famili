@@ -10,12 +10,6 @@ We meet some problems with factory-girl:
 * We require use factories with running rails application for integration tests 
 * So why don't make factory just another class in rails lib, and get extensibility of factories/mothers and rails lazy loading and dependency management?
 
-== Recommended Structure
-
-app
-+- famili
-   +- user_famili.rb
-
 == Setup
 
 1. Create folder app/famili under project root
