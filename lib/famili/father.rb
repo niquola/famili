@@ -8,7 +8,10 @@ module Famili
     end
     
     def build_hash(opts = {})
-      build(opts).attributes.symbolize_keys
+      attributes = build(opts).attributes.symbolize_keys
+      attributes.delete(:updated_at)
+      attributes.delete(:created_at)
+      attributes
     end
 
     def build(opts = {})

@@ -123,6 +123,7 @@ Put following lineinto your Gemfile
 
 == CHANGE LOG:
 
+* 0.1.7  - fix build_hash result to not return updated_at and created_at (it caused errors in models created by new migrations in Rails 3.2)
 * 0.1.6  - support creation of models with properties which have only set accessors
 * 0.1.5  - fix *method_missing* in *define_method*
 * 0.1.4  - famili now creates child in scope of model. So, *self* is a reference to model.
