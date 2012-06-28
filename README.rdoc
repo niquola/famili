@@ -49,7 +49,7 @@ And you can use it anywhere in tests or controllers:
   
  UserFamili.create(:fist_name=>'Override') # create model
  UserFamili.build(:fist_name=>'Override')  # build model (do not save)
- UserFamili.hash(:fist_name=>'Override')   # get attributes hash 
+ UserFamili.build_hash(:fist_name=>'Override')   # get attributes hash
 
  ArticleFamili.create #create article with user
 
@@ -76,7 +76,7 @@ Mother have some usable methods, which can be used
     number { sequence_number }
   end 
 
-Mother supports scopes
+== Scopes
 
   class UserFamili < Mother
     last_name { 'nicola' }
@@ -90,11 +90,22 @@ Mother supports scopes
 
   UserFamili.unidentified.create(:first_name => 'john') # john unknown
 
-You can even use anonymous scope:
+== Anonymous scopes
 
   shared = UserFamili.scoped(:first_name => 'jeffry')
   shared.create(:last_name => 'stone') # jeffry stone
   shared.create(:last_name => 'snow')  # jeffry snow
+
+== Associations
+You can rewrite ArticleFamili declared above with using declarative association syntax:
+
+  class ArticleFamili < Famili::Mother
+    has :user do
+      last_name { 'Smith' }
+    end
+  end
+
+== Collections
 
 When you need to create number of similar objects, you can use {build,create}_brothers methods:
 
@@ -123,6 +134,7 @@ Put following lineinto your Gemfile
 
 == CHANGE LOG:
 
+* 0.1.8  - support brother index in brothers init block, fix bug with using same mother instance for all childs, support declarative association syntax (has :user)
 * 0.1.7  - fix build_hash result to not return updated_at and created_at (it caused errors in models created by new migrations in Rails 3.2)
 * 0.1.6  - support creation of models with properties which have only set accessors
 * 0.1.5  - fix *method_missing* in *define_method*

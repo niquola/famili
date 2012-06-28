@@ -47,11 +47,14 @@ describe Famili do
       def after_create(model)
       end
     end
+  end
 
-    class Article < Mother
-      user { Famili::User.create }
-      title { "article by #{user.last_name}" }
+  class ArticleFamili < Famili::Mother
+    has :user do
+      last_name { 'nicola' }
     end
+
+    title { "article by #{user.last_name}" }
   end
 
   class UserFamili < Famili::Mother
@@ -60,6 +63,7 @@ describe Famili do
     login { "#{last_name}_#{first_name}" }
     last_login_datetime { created_at }
     created_at { Time.now - Random.rand(1000) }
+    seq_no { sequence_number }
 
     def mother_random(n)
       rand(n)
@@ -76,12 +80,12 @@ describe Famili do
   end
 
   it "should have access to Kernel functions" do
-    user = UserFamili.create(:last_name => ->{ "smith_#{rand(100)}" })
+    user = UserFamili.create(:last_name => -> { "smith_#{rand(100)}" })
     user.last_name.should =~ /smith_\d{1,3}/
   end
 
   it "should delegate method call to mother" do
-    user = UserFamili.create(:last_name => ->{ "smith_#{mother_random(100)}" })
+    user = UserFamili.create(:last_name => -> { "smith_#{mother_random(100)}" })
     user.last_name.should =~ /smith_\d{1,3}/
   end
 
@@ -91,17 +95,17 @@ describe Famili do
   end
 
   it "should be evaluated in context of model" do
-    user = UserFamili.create :login => ->{ self.to_s }
+    user = UserFamili.create :login => -> { self.to_s }
     user.login.should == user.to_s
   end
 
   it "should bypass method_missing to model" do
-    user = UserFamili.create :login => ->{ not_defined_method }
+    user = UserFamili.create :login => -> { not_defined_method }
     user.login.should == "not_defined_method is not defined"
   end
 
   it "should create model with only set access propeties" do
-    user = UserFamili.create(:nickname => ->{ "Mr #{login}" })
+    user = UserFamili.create(:nickname => -> { "Mr #{login}" })
     user.calculate_nickname.should == "Mr #{user.login}"
   end
 
@@ -144,7 +148,7 @@ describe Famili do
 
   describe "brothers" do
     it "should build brothers" do
-      brothers = UserFamili.build_brothers(2, :login => ->{ "#{last_name}_#{first_name}_#{rand(100)}" })
+      brothers = UserFamili.build_brothers(2, :login => -> { "#{last_name}_#{first_name}_#{rand(100)}" })
       first, second = brothers
       first.should_not be_persisted
       second.should_not be_persisted
@@ -154,7 +158,7 @@ describe Famili do
     end
 
     it "should create brothers" do
-      brothers = UserFamili.create_brothers(2, :login => ->{ "#{last_name}_#{first_name}_#{rand(100)}" })
+      brothers = UserFamili.create_brothers(2, :login => -> { "#{last_name}_#{first_name}_#{rand(100)}" })
       first, second = brothers
       first.should be_persisted
       second.should be_persisted
@@ -164,7 +168,8 @@ describe Famili do
     end
 
     it "should build brothers with init block" do
-      brothers = UserFamili.build_brothers(2) { |brother| brother.login = "#{brother.login}_#{rand(100)}" }
+      brothers = UserFamili.build_brothers(1) { |brother| brother.login = "#{brother.login}_#{rand(100)}" }
+      brothers += UserFamili.build_brothers(1) { |brother, i| brother.login = "#{brother.login}_#{i}" }
       first, second = brothers
       first.should_not be_persisted
       second.should_not be_persisted
@@ -172,7 +177,7 @@ describe Famili do
       first.last_name.should == second.last_name
       first.login.should_not == second.login
       first.login.should =~ /#{first.last_name}_#{first.first_name}_\d{1,3}/
-      second.login.should =~ /#{second.last_name}_#{second.first_name}_\d{1,3}/
+      second.login.should == "#{second.last_name}_#{second.first_name}_0"
     end
   end
 
@@ -182,7 +187,7 @@ describe Famili do
   end
 
   it "should use save! model" do
-    lambda { Famili::User.create(:login=>nil) }.should raise_error
+    lambda { Famili::User.create(:login => nil) }.should raise_error
   end
 
   it "should create model" do
@@ -191,7 +196,7 @@ describe Famili do
     nicola.last_name.should == 'nicola'
     nicola.first_name.should == 'first_name'
 
-    ivan = Famili::User.create(:name=>'ivan')
+    ivan = Famili::User.create(:name => 'ivan')
     ivan.name.should == 'ivan'
   end
 
@@ -207,19 +212,15 @@ describe Famili do
   end
 
   it "should create model with association" do
-    article = Famili::Article.create
+    article = ArticleFamili.create
     article.user.should_not be_nil
     article.user.class.should == ::User
     article.title.should == "article by nicola"
   end
 
   it "mother should have unique,sequence_number methods" do
-    Famili::User.new.should respond_to(:unique)
-    Famili::User.new.should respond_to(:sequence_number)
-    u1 = Famili::User.create
-    u2 = Famili::User.create
-    seq_number = Famili::User.new.sequence_number
-    next_seq_number = Famili::User.new.sequence_number
+    seq_number = UserFamili.build.seq_no
+    next_seq_number = UserFamili.build.seq_no
     next_seq_number.should == (seq_number + 1)
   end
 

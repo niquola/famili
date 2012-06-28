@@ -36,7 +36,11 @@ module Famili
       @unresolved_property_names.delete(name)
       undefine_property_stub(name)
       attribute_value = @attributes[name]
-      attribute_value = @model.instance_exec(&attribute_value) if attribute_value.is_a?(::Proc)
+      if attribute_value.is_a?(::Proc)
+        attribute_value = @model.instance_exec(&attribute_value)
+      elsif attribute_value.is_a?(::Famili::Father)
+        attribute_value = attribute_value.create
+      end
       @model.send("#{name}=", attribute_value)
     end
 

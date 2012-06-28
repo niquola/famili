@@ -9,6 +9,7 @@ ActiveRecord::Schema.define(:version => 0) do
     t.string   :number,                    :limit => 100
     t.string   :crypted_password,          :limit => 40
     t.string   :salt,                      :limit => 40
+    t.integer  :seq_no
     t.datetime :last_login_datetime
     t.datetime :deleted_at
     t.timestamps
