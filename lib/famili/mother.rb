@@ -37,6 +37,7 @@ module Famili
 
       def inherited(child)
         child.parent_class = self
+        child.pending_tasks = []
       end
 
       def name(&block)
@@ -67,7 +68,7 @@ module Famili
       end
 
       def new_father
-        invoke_pending_tasks
+        invoke_pending_tasks if pending_tasks
         Famili::Father.new(self.new, attributes)
       end
 
@@ -97,14 +98,13 @@ module Famili
 
       protected
 
-      def pending_tasks
-        @pending_tasks ||= []
-      end
+      attr_accessor :pending_tasks
 
       def invoke_pending_tasks
         parent_class.invoke_pending_tasks if parent_class
         if @pending_tasks
           @pending_tasks.each(&:call)
+	  @pending_tasks = nil
         end
       end
 

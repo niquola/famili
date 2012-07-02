@@ -239,4 +239,12 @@ describe Famili do
       Famili::User.unexisting
     }.should raise_error(NoMethodError)
   end
+  
+  describe "associations" do
+    it "should override association" do
+      user = UserFamili.create
+      article = ArticleFamili.create(user: user)
+      article.user.should == user
+    end
+  end
 end
