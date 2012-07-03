@@ -1,4 +1,5 @@
 require 'spec_helper'
+require "uuid"
 
 describe Famili do
   before :all do
@@ -55,6 +56,12 @@ describe Famili do
     end
 
     title { "article by #{user.last_name}" }
+  end
+
+  class CommentableArticleFamili < ArticleFamili
+    self.model_class = Article
+
+    title { "cmt article by #{user.last_name}" }
   end
 
   class UserFamili < Famili::Mother
@@ -158,7 +165,7 @@ describe Famili do
     end
 
     it "should create brothers" do
-      brothers = UserFamili.create_brothers(2, :login => -> { "#{last_name}_#{first_name}_#{rand(100)}" })
+      brothers = UserFamili.create_brothers(2, :login => -> { UUID.generate })
       first, second = brothers
       first.should be_persisted
       second.should be_persisted
@@ -245,6 +252,13 @@ describe Famili do
       user = UserFamili.create
       article = ArticleFamili.create(user: user)
       article.user.should == user
+    end
+  end
+
+  describe "inheritance" do
+    it "should inherit associations" do
+      commentable_article = CommentableArticleFamili.create
+      commentable_article.user.last_name.should == 'nicola'
     end
   end
 end

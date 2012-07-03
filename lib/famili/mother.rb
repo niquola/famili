@@ -1,5 +1,6 @@
 require 'date'
 require 'famili/father'
+require "famili/lazy_value"
 
 module Famili
   class Mother
@@ -37,7 +38,6 @@ module Famili
 
       def inherited(child)
         child.parent_class = self
-        child.pending_tasks = []
       end
 
       def name(&block)
@@ -59,16 +59,19 @@ module Famili
         attributes[method] = block
       end
 
+      def lazy(&block)
+        Famili::LazyValue.new(&block)
+      end
+
       def has(name, &block)
-        pending_tasks.push(Proc.new do
+        attributes[name] = lazy do
           father = "#{model_class.reflect_on_association(name.to_sym).klass.name}Famili".constantize.new_father
           father = father.scoped(collect_attributes(&block)) if block_given?
-          attributes[name] = father
-        end)
+          father
+        end
       end
 
       def new_father
-        invoke_pending_tasks if pending_tasks
         Famili::Father.new(self.new, attributes)
       end
 
@@ -85,7 +88,7 @@ module Famili
 
       def model_class(klass = nil)
         if klass
-          @model_class = klass
+          self.model_class = klass
           return
         end
 
@@ -96,17 +99,11 @@ module Famili
                          end
       end
 
-      protected
-
-      attr_accessor :pending_tasks
-
-      def invoke_pending_tasks
-        parent_class.invoke_pending_tasks if parent_class
-        if @pending_tasks
-          @pending_tasks.each(&:call)
-	  @pending_tasks = nil
-        end
+      def model_class=(klass)
+        @model_class = klass
       end
+
+      protected
 
       def collect_attributes
         saved_attributes, @attributes = @attributes, {}

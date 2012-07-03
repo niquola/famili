@@ -5,4 +5,5 @@ group :test do
   gem "activerecord", "~>3.0.0"
   gem "rake"
   gem "rspec"
+  gem 'uuid'
 end
