@@ -1,5 +1,5 @@
 module Famili
   module Version
-    STRING = '0.1.9.1'
+    STRING = '1.0.0'
   end
 end

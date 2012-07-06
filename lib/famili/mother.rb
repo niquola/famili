@@ -2,8 +2,15 @@ require 'date'
 require 'famili/father'
 require "famili/lazy_value"
 
+unless Class.respond_to?(:class_attribute)
+  require 'famili/class_attribute'
+end
+
 module Famili
   class Mother
+    class_attribute :father_class
+    self.father_class = Famili::Father
+
     def before_save(model)
     end
 
@@ -15,7 +22,7 @@ module Famili
     end
 
     def sequence_number
-      @sequence_number||= self.class.objects_sequence_number
+      @sequence_number ||= self.class.objects_sequence_number
     end
 
     class << self
@@ -72,14 +79,17 @@ module Famili
       end
 
       def new_father
-        Famili::Father.new(self.new, attributes)
+        father_class.new(self.new, attributes)
+      end
+
+      def trait(name, &block)
+        attributes = collect_attributes(&block)
+        scope(name) { scoped(attributes) }
       end
 
       def scope(name, &block)
-        scopes[name] = collect_attributes(&block)
-        singleton_class.send(:define_method, name) do
-          new_father.send(name)
-        end
+        ensure_own_father_class.send(:define_method, name, &block)
+        singleton_class.delegate name, to: :new_father
       end
 
       def scopes
@@ -104,6 +114,11 @@ module Famili
       end
 
       protected
+
+      def ensure_own_father_class
+        @father_class = self.father_class = Class.new(self.father_class) unless @father_class == father_class
+        @father_class
+      end
 
       def collect_attributes
         saved_attributes, @attributes = @attributes, {}

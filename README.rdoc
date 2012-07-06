@@ -76,19 +76,42 @@ Mother have some usable methods, which can be used
     number { sequence_number }
   end 
 
-== Scopes
+== Traits
 
-  class UserFamili < Mother
+You can add named set of attributes to override or extend default values
+
+  class UserFamili < Famili::Mother
     last_name { 'nicola' }
     login { "#{last_name}_#{unique}" }
     number { sequence_number }
 
-    scope :unidentified do
+    trait :unidentified do
       last_name { 'unknown' }
     end
   end
 
   UserFamili.unidentified.create(:first_name => 'john') # john unknown
+
+== Scopes
+
+Its also possible to use named scopes (like ActiveRecord)
+
+  class UserFamili < Famili::Mother
+    last_name { 'nicola' }
+
+    scope :prefixed do |prefix|
+      scoped(last_name: "#{prefix}#{attributes[:last_name]}")
+    end
+
+    scope :suffixed do |suffix|
+      scoped(last_name: "#{attributes[:last_name]}#{suffix}")
+    end
+
+    scope :mr_junior do
+      prefixed('Mr ').suffixed(', Jr')
+    end
+  end
+
 
 == Anonymous scopes
 
@@ -134,6 +157,7 @@ Put following lineinto your Gemfile
 
 == CHANGE LOG:
 
+* 1.0.0  - changed API (old scope renamed to trait, scope conception refined)
 * 0.1.9  - optimize creation of relations
 * 0.1.8  - support brother index in brothers init block, fix bug with using same mother instance for all childs, support declarative association syntax (has :user)
 * 0.1.7  - fix build_hash result to not return updated_at and created_at (it caused errors in models created by new migrations in Rails 3.2)

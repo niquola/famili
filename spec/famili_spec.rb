@@ -76,13 +76,29 @@ describe Famili do
       rand(n)
     end
 
-    scope :russian do
+    trait :russian do
       first_name { 'ivan' }
       last_name { 'petrov' }
     end
 
-    scope :unidentified do
+    trait :unidentified do
       last_name { 'unknown' }
+    end
+
+    scope :with_articles do |count|
+      scoped(articles: -> { ArticleFamili.build_brothers(count, user: self) })
+    end
+
+    scope :prefixed do |prefix|
+      scoped(last_name: "#{prefix}#{attributes[:last_name]}")
+    end
+
+    scope :suffixed do |suffix|
+      scoped(last_name: "#{attributes[:last_name]}#{suffix}")
+    end
+
+    scope :mr_junior do
+      prefixed('Mr ').suffixed(', Jr')
     end
   end
 
@@ -150,6 +166,16 @@ describe Famili do
       shared.create(:last_name => 'stone').login.should == 'stone_jeffry'
       shared.create(:last_name => 'snow').login.should == 'snow_jeffry'
       shared.unidentified.create.login.should == 'unknown_jeffry'
+    end
+
+    it "should parameterize scope" do
+      user = UserFamili.with_articles(5).create
+      user.articles.count.should == 5
+    end
+
+    it "should access previous attribute values" do
+      user = UserFamili.scoped(last_name: 'Smith').mr_junior.create
+      user.last_name.should == 'Mr Smith, Jr'
     end
   end
 
@@ -246,7 +272,7 @@ describe Famili do
       Famili::User.unexisting
     }.should raise_error(NoMethodError)
   end
-  
+
   describe "associations" do
     it "should override association" do
       user = UserFamili.create

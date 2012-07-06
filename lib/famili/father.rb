@@ -2,6 +2,9 @@ require "famili/child"
 
 module Famili
   class Father
+    attr_reader :attributes
+    attr_reader :mother
+
     def initialize(mother, attributes)
       @mother = mother
       @attributes = attributes
@@ -50,21 +53,13 @@ module Famili
     end
 
     def scoped(attributes = {})
-      Famili::Father.new(@mother, merge(attributes))
-    end
-
-    def method_missing(name, *args)
-      if scope_attributes = @mother.class.scopes[name]
-        scoped(scope_attributes)
-      else
-        super(name, *args)
-      end
+      self.class.new(@mother, merge(attributes))
     end
 
     private
 
     def merge(attributes)
-      @attributes.merge(attributes)
+      self.attributes.merge(attributes)
     end
   end
 end
