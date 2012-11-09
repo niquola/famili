@@ -14,6 +14,10 @@ describe Famili do
     has_many :articles
     validates_presence_of :login
 
+    def full_name
+      "#{last_name}, #{first_name}"
+    end
+
     def nickname=(value)
       @nickname = value
     end
@@ -47,6 +51,18 @@ describe Famili do
 
       def after_create(model)
       end
+    end
+  end
+
+  class Person
+    attr_accessor :id, :name
+  end
+
+  class PersonFamili < Famili::GrandMother
+    name { 'Some Person' }
+
+    def save(model)
+      model.id = UUID.generate
     end
   end
 
@@ -177,6 +193,11 @@ describe Famili do
       user = UserFamili.scoped(last_name: 'Smith').mr_junior.create
       user.last_name.should == 'Mr Smith, Jr'
     end
+
+    it 'should use scopes using famili instance' do
+      user = UserFamili.new.russian.build(last_name: 'Smith')
+      user.full_name.should == "Smith, ivan"
+    end
   end
 
   describe "brothers" do
@@ -211,6 +232,11 @@ describe Famili do
       first.login.should_not == second.login
       first.login.should =~ /#{first.last_name}_#{first.first_name}_\d{1,3}/
       second.login.should == "#{second.last_name}_#{second.first_name}_0"
+    end
+
+    it 'should build brothers using famili instance' do
+      brothers = UserFamili.new.build_brothers(1, first_name: 'John', last_name: 'Smith')
+      brothers.first.full_name.should == "Smith, John"
     end
   end
 
@@ -285,6 +311,20 @@ describe Famili do
     it "should inherit associations" do
       commentable_article = CommentableArticleFamili.create
       commentable_article.user.last_name.should == 'nicola'
+    end
+  end
+
+  describe 'custom persistence' do
+    it 'should build model' do
+      person = PersonFamili.build(name: 'John Smith')
+      person.name.should == 'John Smith'
+      person.id.should be_nil
+    end
+
+    it 'should create model' do
+      person = PersonFamili.create(name: 'John Smith')
+      person.name.should == 'John Smith'
+      person.id.should_not be_nil
     end
   end
 end

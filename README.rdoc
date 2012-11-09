@@ -140,6 +140,49 @@ If you have complex initialization logic, which you want apply just after object
     user.login = "updated_#{user.login}"
   end
 
+== Custom Persistence
+
+You even can use famili for not active record models. You don't need change everything if you just need to build object. But if you need custom persistence you may write custom save method:
+
+  class Person
+    attr_accessor :persisted, :name
+  end
+
+  class PersonFamili < Famili::Mother
+    name { 'John Smith' }
+
+    def save(model)
+        model.persisted = true
+    end
+  end
+
+Now, you can create your model as usual:
+
+  PersonFamili.create(name: 'Barry Redwell') # persisted == true
+
+If you need some additional objects for persistence (a.e. you are using some persistence service), then you have option to use famili instance instead of singleton:
+
+  class XmlSerializer
+    def serialize(model)
+    end
+  end
+
+  class PersonFamili < Famili::Mother
+    name { 'John Smith' }
+
+    def initialize(serializer)
+        @serializer = serializer
+    end
+
+    def save(person)
+        serializer.serialize(person)
+    end
+  end
+
+and usage sample:
+
+   PersonFamili.new(XmlSerializer.new).create
+
 == Some useful methods
 
 * sequence_number - incremented with each instance
@@ -157,6 +200,7 @@ Put following lineinto your Gemfile
 
 == CHANGE LOG:
 
+* 1.1.0  - support custom persistence, support building & creating of objects using famili instance
 * 1.0.0  - changed API (old scope renamed to trait, scope conception refined)
 * 0.1.9  - optimize creation of relations
 * 0.1.8  - support brother index in brothers init block, fix bug with using same mother instance for all childs, support declarative association syntax (has :user)

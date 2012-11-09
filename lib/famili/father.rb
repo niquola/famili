@@ -27,7 +27,7 @@ module Famili
 
     def create(opts = {}, &block)
       model = build(opts, &block)
-      model.save!
+      @mother.save(model)
       @mother.after_create(model)
       model
     end
