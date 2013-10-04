@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/niquola/famili"
   s.summary     = "famili-#{Famili::Version::STRING}"
   s.description = "Yet another object mother pattern implementation."
+  s.license     = 'MIT'
 
   s.files            = `git ls-files -- lib/*`.split("\n")
   s.test_files       = `git ls-files -- {spec,features}/*`.split("\n")
